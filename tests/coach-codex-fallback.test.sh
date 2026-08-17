@@ -13,6 +13,11 @@ cat > "$FAKE_CODEX" <<'EOF'
 #!/usr/bin/env bash
 set -u
 
+if [[ "${1:-}" == "--version" ]]; then
+  printf 'codex-cli %s\n' "${FAKE_CODEX_VERSION:-0.146.0}"
+  exit 0
+fi
+
 model=""
 for ((i = 1; i <= $#; i++)); do
   if [[ "${!i}" == "--model" ]]; then
@@ -92,21 +97,43 @@ assert_line_count 3
 }
 
 hook_json="$(
-  REWRITTEN=$'[100] test prompt\n──── Native style ────\ntest prompt' \
-  ORIGINAL_PROMPT='test prompt' \
-  LT_LANGUAGE=english \
-  REDPEN_SINGLE_LINE=1 \
-  /usr/bin/env python3 "$ROOT/plugins/redpen-codex/shared/render_diff.py"
+  : > "$CALL_LOG"
+  printf '%s\n' '{"prompt":"test prompt"}' |
+    HOME="$TEST_DIR" \
+    REDPEN_CODEX_BIN="$FAKE_CODEX" \
+    REDPEN_NO_TELEMETRY=1 \
+    FAKE_CODEX_VERSION=0.136.0 \
+    FAKE_CALL_LOG="$CALL_LOG" \
+    bash "$ROOT/plugins/redpen-codex/shared/coach_codex.sh"
 )"
 HOOK_JSON="$hook_json" /usr/bin/env python3 -c '
 import json
 import os
+import re
 
 message = json.loads(os.environ["HOOK_JSON"])["systemMessage"]
-prefix = "\r\x1b[2K"
-assert message.startswith(prefix), repr(message[:20])
-assert message[len(prefix)] != "\n", repr(message[:20])
-assert message[len(prefix)] != " ", repr(message[:20])
+plain = re.sub(r"\x1b\[[0-9;]*m", "", message)
+assert plain == "[100] test prompt\n──── Native style ────\ntest prompt", repr(plain)
+assert "\r\x1b[2K" not in message, repr(message[:20])
+'
+
+legacy_hook_json="$(
+  : > "$CALL_LOG"
+  printf '%s\n' '{"prompt":"test prompt"}' |
+    HOME="$TEST_DIR" \
+    REDPEN_CODEX_BIN="$FAKE_CODEX" \
+    REDPEN_NO_TELEMETRY=1 \
+    FAKE_CODEX_VERSION=0.135.0 \
+    FAKE_CALL_LOG="$CALL_LOG" \
+    bash "$ROOT/plugins/redpen-codex/shared/coach_codex.sh"
+)"
+HOOK_JSON="$legacy_hook_json" /usr/bin/env python3 -c '
+import json
+import os
+
+message = json.loads(os.environ["HOOK_JSON"])["systemMessage"]
+assert message.startswith("\r\x1b[2K"), repr(message[:20])
+assert "\n" not in message, repr(message)
 '
 
 printf 'coach model fallback tests passed\n'

@@ -51,12 +51,10 @@ redpen: [62] help me fix the bug — the app crashes when I click the button.
 The assistant then proceeds to answer your original prompt normally.
 ```
 
-In Codex CLI the same 3 rows appear, but the divider and native-style
-line start at the left margin (no indentation), because the plugin pads
-each section with spaces to the terminal column boundary so natural wrap
-produces the row breaks — Codex's `systemMessage` channel is a
-single-string toast that strips all newlines (see
-[Platform differences](#platform-differences)):
+In Codex CLI 0.136.0 and newer, the same 3 rows use native newline-delimited
+`systemMessage` content, so the score, divider, and native-style suggestion stay
+separate regardless of terminal width. Older Codex versions retain the legacy
+terminal-wrap fallback:
 
 ```
 You: help me fix the bug, the app crash when click button
@@ -83,7 +81,7 @@ constraints:
 | Default model | `haiku` (alias), user-configurable via `/redpen:setup` | `gpt-5.6-luna` Fast, with automatic fallback to `gpt-5.6-terra` Fast and then `gpt-5.4-mini` Standard |
 | Setup invoke | `/redpen:setup` | `$redpen-setup` (Codex skill — TUI only) |
 | Hook target | `claude -p` | `codex exec` |
-| Output layout | multi-line (score / divider / native style) | visually 3 rows (score / divider / native style), same divider label as Claude Code — Codex's `systemMessage` channel is a single-string toast that strips all newlines, so the plugin pads each section to the terminal column boundary and relies on natural terminal wrap for the row breaks |
+| Output layout | multi-line (score / divider / native style) | native multi-line output on Codex 0.136.0+; terminal-wrap fallback on older versions |
 
 The two configs live at independent paths (`~/.claude/redpen.config` vs
 `~/.codex/redpen.config`), so both plugins can be installed side-by-side
@@ -220,14 +218,10 @@ there.
 
 ## Codex CLI — known limitations
 
-- **Single-string output channel.** Codex's `systemMessage` hook channel
-  renders as a single-string warning toast that strips all newlines
-  (verified empirically — `\n`, `\n\n`, `\r`, `<br>`, U+2028, markdown
-  hard break, all collapse). The Codex plugin works around this by padding
-  each section (score line / divider / native-style line) with spaces to
-  the terminal column boundary, letting natural terminal wrap create the
-  visual row breaks. The visual result is the same 3-row layout as Claude
-  Code; the divider label (`──── Native style ────` etc.) is identical.
+- **Hook feedback uses native multi-line output on Codex 0.136.0+.** Redpen
+  emits the score, divider, and native-style suggestion with real newlines, so
+  layout no longer depends on terminal width. Codex 0.135.x and older keep the
+  legacy terminal-wrap fallback.
 - **Models use an automatic speed-first fallback chain.** Redpen first tries
   `gpt-5.6-luna` with Fast mode. If that request fails or returns no output,
   it retries with `gpt-5.6-terra` in Fast mode, then falls back to

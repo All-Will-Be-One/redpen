@@ -281,8 +281,18 @@ if [[ "${REDPEN_OUTPUT:-}" == "structured" ]]; then
       /usr/bin/env python3 "${_REDPEN_SHARED_DIR}/render_diff.py")" \
     || { log "fatal: render_diff.py failed"; exit 0; }
 else
+  REDPEN_SINGLE_LINE=1
+  CODEX_VERSION="$($CODEX_BIN --version 2>/dev/null || true)"
+  if [[ "$CODEX_VERSION" =~ ^codex-cli[[:space:]]+([0-9]+)\.([0-9]+)\. ]]; then
+    CODEX_VERSION_MAJOR="${BASH_REMATCH[1]}"
+    CODEX_VERSION_MINOR="${BASH_REMATCH[2]}"
+    if (( CODEX_VERSION_MAJOR > 0 || CODEX_VERSION_MINOR >= 136 )); then
+      REDPEN_SINGLE_LINE=0
+    fi
+  fi
+  log "renderer single_line=$REDPEN_SINGLE_LINE codex_version=${CODEX_VERSION:-<unknown>}"
   OUTPUT_JSON="$(REWRITTEN="$REWRITTEN" ORIGINAL_PROMPT="$PROMPT" LT_LANGUAGE="$LANGUAGE" \
-      REDPEN_SINGLE_LINE=1 \
+      REDPEN_SINGLE_LINE="$REDPEN_SINGLE_LINE" \
       /usr/bin/env python3 "${_REDPEN_SHARED_DIR}/render_diff.py")" \
     || { log "fatal: render_diff.py failed"; exit 0; }
 fi
