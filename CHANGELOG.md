@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5-fork.1] - 2026-10-09
+
+Personal fork release of the Codex plugin; other plugin and launcher versions are unchanged.
+
 ### Fixed
+
+- Skip Codex `<send_user_message_question_reply>` envelopes before invoking the
+  coaching model, as reported in upstream issue #33.
 
 - **Codex feedback now uses native multi-line hook output on 0.136.0+.** The
   score, divider, and native-style suggestion use real newlines instead of

@@ -6,7 +6,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEST_DIR="$(mktemp -d "${TMPDIR:-/tmp}/redpen-model-fallback.XXXXXX")"
 trap 'rm -rf "$TEST_DIR"' EXIT
 
-FAKE_CODEX="$TEST_DIR/codex"
+FAKE_CODEX="$TEST_DIR/codex executable"
 CALL_LOG="$TEST_DIR/calls.log"
 
 cat > "$FAKE_CODEX" <<'EOF'
@@ -136,4 +136,20 @@ assert message.startswith("\r\x1b[2K"), repr(message[:20])
 assert "\n" not in message, repr(message)
 '
 
-printf 'coach model fallback tests passed\n'
+# Interactive answers are harness input, not prose to send to the coach.
+: > "$CALL_LOG"
+reply_json="$(
+  printf '%s\n' '{"prompt":"<send_user_message_question_reply>\n[{\"answer\":\"Coffee\",\"question\":\"Which drink?\"}]\n</send_user_message_question_reply>"}' |
+    HOME="$TEST_DIR" \
+    REDPEN_CODEX_BIN="$FAKE_CODEX" \
+    REDPEN_NO_TELEMETRY=1 \
+    FAKE_CALL_LOG="$CALL_LOG" \
+    bash "$ROOT/plugins/redpen-codex/hooks/grammar_check.sh"
+)"
+assert_line_count 0
+[[ -z "$reply_json" ]] || {
+  printf 'expected no coaching output for an interactive answer\n' >&2
+  exit 1
+}
+
+printf 'coach model fallback and hook output tests passed\n'

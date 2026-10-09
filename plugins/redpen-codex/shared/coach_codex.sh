@@ -92,6 +92,7 @@ log "prompt[0..80]=$(printf '%s' "$PROMPT" | head -c 80)"
 if [[ -z "$PROMPT" ]]; then log "skip: empty prompt"; exit 0; fi
 
 case "$PROMPT" in
+  '<send_user_message_question_reply>'*|\
   '<task-notification>'*|\
   '<system-reminder>'*|\
   '<command-name>'*|\
@@ -282,7 +283,7 @@ if [[ "${REDPEN_OUTPUT:-}" == "structured" ]]; then
     || { log "fatal: render_diff.py failed"; exit 0; }
 else
   REDPEN_SINGLE_LINE=1
-  CODEX_VERSION="$($CODEX_BIN --version 2>/dev/null || true)"
+  CODEX_VERSION="$("$CODEX_BIN" --version 2>/dev/null || true)"
   if [[ "$CODEX_VERSION" =~ ^codex-cli[[:space:]]+([0-9]+)\.([0-9]+)\. ]]; then
     CODEX_VERSION_MAJOR="${BASH_REMATCH[1]}"
     CODEX_VERSION_MINOR="${BASH_REMATCH[2]}"

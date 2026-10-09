@@ -1,5 +1,21 @@
 # redpen
 
+> Personal fork of [12og3r/redpen](https://github.com/12og3r/redpen).
+> Codex plugin version `0.4.5-fork.1` includes the native multiline fix from
+> [upstream PR #32](https://github.com/12og3r/redpen/pull/32) and skips interactive
+> question-answer envelopes ([upstream issue #33](https://github.com/12og3r/redpen/issues/33)).
+> Original authorship and license are preserved. The instructions below otherwise
+> describe upstream; to install this fork in Codex, use:
+>
+> ```sh
+> codex plugin marketplace add https://github.com/All-Will-Be-One/redpen.git
+> codex plugin add redpen-codex@redpen
+> ```
+>
+> If `redpen` is already configured, change its marketplace source in
+> `~/.codex/config.toml` to the fork URL, then run
+> `codex plugin marketplace upgrade redpen` and `codex plugin add redpen-codex@redpen`.
+
 [![installs](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fredpen-telemetry.redpen.workers.dev%2Fstats&query=%24.total&label=installs&color=brightgreen)](#telemetry--privacy)
 [![Claude Code](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fredpen-telemetry.redpen.workers.dev%2Fstats&query=%24.claude&label=Claude%20Code&color=blue)](#telemetry--privacy)
 [![OpenAI](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fredpen-telemetry.redpen.workers.dev%2Fstats&query=%24.codex&label=OpenAI&color=blue)](#telemetry--privacy)

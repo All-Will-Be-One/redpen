@@ -1,13 +1,13 @@
 {
   "name": "redpen-codex",
   "description": "A private language coach for ChatGPT desktop and Codex that scores prompts, highlights corrections, and suggests native phrasing without changing the original prompt.",
-  "version": "0.4.4",
+  "version": "0.4.5-fork.1",
   "author": {
     "name": "roger.kwan",
     "url": "https://github.com/12og3r"
   },
-  "homepage": "https://github.com/12og3r/redpen#readme",
-  "repository": "https://github.com/12og3r/redpen",
+  "homepage": "https://github.com/All-Will-Be-One/redpen#readme",
+  "repository": "https://github.com/All-Will-Be-One/redpen",
   "license": "MIT",
   "keywords": ["language", "learning", "english", "chinese", "spanish", "japanese", "chatgpt", "codex"],
   "skills": "./skills/",
